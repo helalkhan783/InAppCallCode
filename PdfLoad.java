@@ -59,122 +59,13 @@ public class PdfLoad extends BaseActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pdf_load);
         binding.ok.appBarTitle.setText(getIntent().getStringExtra("title"));
-        init();
-
-        if (getIntent().getStringExtra("title").equals("Help & Support")) {
-            binding.pdfLayout.setVisibility(View.GONE);
-            binding.termsAndConditionLay.setVisibility(View.VISIBLE);
-            binding.toolbar.setVisibility(View.GONE);
-            binding.termAccess.headerAccess.headTitleTv.setText("Help & Support");
-            binding.termAccess.headerAccess.headTitleTv.setVisibility(View.VISIBLE);
-            getData();
-
-
-        } else {
-            binding.pdfLayout.setVisibility(View.VISIBLE);
-            binding.termsAndConditionLay.setVisibility(View.GONE);
-            binding.pdfView.fromAsset(getIntent().getStringExtra("pdf"))
-                    .enableSwipe(true) // allows to block changing pages using swipe
-                    .swipeHorizontal(false)
-                    .enableDoubletap(true)
-                    .defaultPage(0)
-                    .enableAnnotationRendering(false) // render annotations (such as comments, colors or forms)
-                    .password(null)
-                    .scrollHandle(null)
-                    .enableAntialiasing(true) // improve rendering a little bit on low-res screens
-                    .spacing(0)
-                    .load();
-        }
+        
 
     }
 
-    private void getData() {
-        ShowLoading();
-        try {
-            RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-            JsonObjectRequest jsonObj = new JsonObjectRequest(Request.Method.GET, "https://secure.welfarebd.org/api/help_info", null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
-                        HideLoading();
-                        Log.d("Responsed", String.valueOf(response));
+   
 
-                        String status = response.getString("status");
-                        String msg = response.getString("msg");
-                        if (status.equals("1")) {
-                            JSONObject UserData = response.getJSONObject("help_and_support");
-                            String name = UserData.getString("name");
-                            String designtion = UserData.getString("designtion");
-                            String contact = UserData.getString("contact");
-                            String primary_email = UserData.getString("primary_email");
-                            String secondary_email = UserData.getString("secondary_email");
-                            String primary_phone = UserData.getString("primary_phone");
-                            String secondary_phone = UserData.getString("secondary_phone");
-                            String primary_mobile = UserData.getString("primary_mobile");
-                            String secondary_mobile = UserData.getString("secondary_mobile");
-                            String website = UserData.getString("website");
-                            String finalWeb = website.substring(8);
-                            binding.termAccess.name.setText("" + name);
-                            binding.termAccess.mobileNumberOne.setText("" + primary_mobile);
-                            binding.termAccess.mobileNumberTwo.setText("" + secondary_mobile);
-                            binding.termAccess.contact.setText("" + contact);
-                            binding.termAccess.mailOne.setText("" + primary_email);
-                            binding.termAccess.mailTwo.setText("" + secondary_email);
-
-
-                            binding.termAccess.website.setText("" + finalWeb);
-                            binding.termAccess.designation.setText("" + designtion);
-                            binding.termAccess.telephoneNumber.setText("" + primary_phone);
-
-
-                        } else {
-                            HideLoading();
-                            ShowAlert(msg);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        HideLoading();
-                        ShowAlert("Invalid Response");
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    HideLoading();
-                    ShowAlert("Invalid Response");
-                }
-            }) {
-                @Override
-                public Map getHeaders() throws AuthFailureError {
-                    Map headers = new HashMap();
-                    headers = getHeaderAuthorization();
-                    Log.d("HeaderData", String.valueOf(headers));
-                    return headers;
-                }
-            };
-            jsonObj.setShouldCache(false);
-            jsonObj.setRetryPolicy(new DefaultRetryPolicy(0, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-            queue.add(jsonObj);
-        } catch (Exception e) {
-            HideLoading();
-            ShowAlert("Invalid Response");
-        }
-    }
-
-    private void init() {
-        binding.termAccess.mobileNumberOne.setOnClickListener(this);
-        binding.termAccess.mobileNumberTwo.setOnClickListener(this);
-        binding.termAccess.contact.setOnClickListener(this);
-        binding.termAccess.telephoneNumber.setOnClickListener(this);
-        binding.termAccess.mailOne.setOnClickListener(this);
-        binding.termAccess.mailTwo.setOnClickListener(this);
-        binding.termAccess.website.setOnClickListener(this);
-        binding.termAccess.websiteOne.setOnClickListener(this);
-        binding.ok.backButton.setOnClickListener(this);
-        binding.termAccess.headerAccess.backButton.setOnClickListener(this);
-    }
-
+   
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -184,26 +75,7 @@ public class PdfLoad extends BaseActivity implements View.OnClickListener {
             phoneCall();
             return;
         }
-        if (view.getId() == R.id.mobileNumberTwo) {
-            phone = binding.termAccess.mobileNumberTwo.getText().toString().trim();
-            phoneCall();
-            return;
-        }
-        if (view.getId() == R.id.contact) {
-            phone = binding.termAccess.contact.getText().toString().trim();
-            phoneCall();
-            return;
-        }
-        if (view.getId() == R.id.telephoneNumber) {
-            phone = binding.termAccess.telephoneNumber.getText().toString().trim();
-            phoneCall();
-
-            return;
-        }
-        if (view.getId() == R.id.mailOne) {
-            startMail(binding.termAccess.mailOne.getText().toString());
-            return;
-        }
+         
         if (view.getId() == R.id.mailTwo) {
             startMail(binding.termAccess.mailTwo.getText().toString());
             return;
@@ -212,24 +84,7 @@ public class PdfLoad extends BaseActivity implements View.OnClickListener {
             onBackPressed();
             return;
         }
-        if (view.getId() == binding.termAccess.headerAccess.backButton.getId()) {
-            onBackPressed();
-            return;
-        }
-        if (view.getId() == R.id.website) {
-            Intent intent = new Intent(PdfLoad.this, Webview.class);
-            intent.putExtra("url", "https://" + binding.termAccess.website.getText().toString());
-            intent.putExtra("title", "Welfare Website");
-            startActivity(intent);
-            return;
-        }
-        if (view.getId() == R.id.websiteOne) {
-            Intent intent = new Intent(PdfLoad.this, Webview.class);
-            intent.putExtra("url", "https://welfarefamily.org");
-            intent.putExtra("title", "Welfare Website");
-            startActivity(intent);
-            return;
-        }
+        
     }
 
 
